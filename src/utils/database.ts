@@ -89,9 +89,6 @@ async function migrateLessonProgressToCompositeKey(database: SQLite.SQLiteDataba
 }
 
 export async function seedVocab(words: VocabWord[]) {
-  const count = await db.getFirstAsync<{ count: number }>('SELECT COUNT(*) as count FROM vocab');
-  if (count && count.count > 0) return;
-
   for (const word of words) {
     await db.runAsync(
       'INSERT OR IGNORE INTO vocab (id, chinese, pinyin, english, hsk_level) VALUES (?, ?, ?, ?, ?)',
