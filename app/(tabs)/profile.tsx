@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getUserStats, getAllLessonProgress } from '@/src/utils/database';
+import { getAllLessons } from '@/src/data/lessons';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -27,7 +28,8 @@ export default function ProfileScreen() {
         if (progress) {
           const completed = progress.filter(p => p.status === 'completed').length;
           const inProgress = progress.filter(p => p.status === 'in_progress').length;
-          setLessonStats({ completed, inProgress, total: 30 });
+          const totalLessons = getAllLessons().length;
+          setLessonStats({ completed, inProgress, total: totalLessons });
         }
       });
     }, [])

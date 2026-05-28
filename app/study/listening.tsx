@@ -105,6 +105,7 @@ export default function ListeningScreen() {
       {/* Speaker area */}
       <View style={styles.speakerArea}>
         <Text style={styles.instruction}>What do you hear?</Text>
+        <Text style={{ fontSize: 12, color: '#666' }}>HSK 1 practice mode</Text>
         <TouchableOpacity
           style={[styles.speakerBtn, isPlaying && styles.speakerBtnActive]}
           onPress={playAudio}

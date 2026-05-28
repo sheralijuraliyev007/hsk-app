@@ -98,6 +98,7 @@ export default function StudySession() {
           <Text style={styles.progress}>{currentIndex + 1} / {cards.length}</Text>
           <Text style={styles.score}>✓ {correct}</Text>
         </View>
+        <Text style={{ color: '#666', textAlign: 'center', marginBottom: 8 }}>Legacy SRS session</Text>
 
         <View style={styles.progressBarBg}>
           <View style={[styles.progressBarFill, { width: `${(currentIndex / cards.length) * 100}%` }]} />

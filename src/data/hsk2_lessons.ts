@@ -3674,15 +3674,3 @@ export interface VocabWord {
     return HSK2_LESSONS.filter(l => l.hskLevel === level);
   }
   
-  // Compatibility aliases matching the HSK 1 lesson file API.
-  export function getAllLessons(): Lesson[] {
-    return HSK2_LESSONS;
-  }
-  
-  export function getLessonById(id: number): Lesson | undefined {
-    return HSK2_LESSONS.find(l => l.id === id);
-  }
-  
-  export function getLessonsByLevel(level: number): Lesson[] {
-    return HSK2_LESSONS.filter(l => l.hskLevel === level);
-  }

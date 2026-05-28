@@ -6,6 +6,16 @@ import { View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { openDatabase, seedVocab } from '@/src/utils/database';
 import { HSK1_VOCAB } from '@/src/data/hsk1';
+import { HSK2_LESSONS } from '@/src/data/hsk2_lessons';
+
+const HSK2_VOCAB = HSK2_LESSONS.flatMap((lesson) =>
+  lesson.vocabulary.map((word) => ({
+    ...word,
+    // Keep IDs unique across all lessons/levels for sqlite vocab PK.
+    id: 200000 + lesson.id * 1000 + word.id,
+    hskLevel: lesson.hskLevel,
+  }))
+);
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
@@ -15,6 +25,7 @@ export default function RootLayout() {
       try {
         await openDatabase();
         await seedVocab(HSK1_VOCAB);
+        await seedVocab(HSK2_VOCAB);
       } catch (e) {
         console.warn('DB init error:', e);
       } finally {
