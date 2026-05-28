@@ -165,68 +165,52 @@ export interface VocabWord {
       "dialogues": [
         {
           "id": 1,
-          "titleChinese": "谈旅游",
-          "titleEnglish": "Talking about travel",
+          "titleChinese": "在学校",
+          "titleEnglish": "In the school",
           "trackNumber": "01-1",
           "lines": [
-            {
-              "speaker": "A",
-              "chinese": "我想去北京旅游，你觉得什么时候最好？",
-              "pinyin": "Wǒ xiǎng qù Běijīng lǚyóu, nǐ juéde shénme shíhou zuì hǎo?",
-              "english": "I want to travel to Beijing. When do you think is best?"
-            },
-            {
-              "speaker": "B",
-              "chinese": "九月最好，因为天气不冷也不热。",
-              "pinyin": "Jiǔ yuè zuì hǎo, yīnwèi tiānqì bù lěng yě bú rè.",
-              "english": "September is best, because the weather is neither cold nor hot."
-            }
+            { "speaker": "A", "chinese": "我要去北京旅游，你觉得什么时候去最好？", "pinyin": "Wǒ yào qù Běijīng lǚyóu, nǐ juéde shénme shíhou qù zuì hǎo?", "english": "I'm going to Beijing for a trip. When do you think is the best time to go?" },
+            { "speaker": "B", "chinese": "九月去北京旅游最好。", "pinyin": "Jiǔ yuè qù Běijīng lǚyóu zuì hǎo.", "english": "September is the best time to visit Beijing." },
+            { "speaker": "A", "chinese": "为什么？", "pinyin": "Wèishénme?", "english": "Why?" },
+            { "speaker": "B", "chinese": "九月的北京天气不冷也不热。", "pinyin": "Jiǔ yuè de Běijīng tiānqì bù lěng yě bú rè.", "english": "The weather in Beijing in September is neither cold nor hot." }
           ]
         },
         {
           "id": 2,
-          "titleChinese": "约运动",
-          "titleEnglish": "Arranging exercise",
+          "titleChinese": "看照片",
+          "titleEnglish": "Looking at a picture",
           "trackNumber": "01-2",
           "lines": [
-            {
-              "speaker": "A",
-              "chinese": "你喜欢什么运动？",
-              "pinyin": "Nǐ xǐhuan shénme yùndòng?",
-              "english": "What sport do you like?"
-            },
-            {
-              "speaker": "B",
-              "chinese": "我最喜欢踢足球。",
-              "pinyin": "Wǒ zuì xǐhuan tī zúqiú.",
-              "english": "I like playing football most."
-            },
-            {
-              "speaker": "A",
-              "chinese": "下午我们一起去踢足球吧。",
-              "pinyin": "Xiàwǔ wǒmen yìqǐ qù tī zúqiú ba.",
-              "english": "Let’s go play football together this afternoon."
-            }
+            { "speaker": "A", "chinese": "你喜欢什么运动？", "pinyin": "Nǐ xǐhuan shénme yùndòng?", "english": "What sport do you like?" },
+            { "speaker": "B", "chinese": "我最喜欢踢足球。", "pinyin": "Wǒ zuì xǐhuan tī zúqiú.", "english": "I like playing football the most." },
+            { "speaker": "A", "chinese": "下午我们一起去踢足球吧。", "pinyin": "Xiàwǔ wǒmen yìqǐ qù tī zúqiú ba.", "english": "Let's go play football together this afternoon." },
+            { "speaker": "B", "chinese": "好啊", "pinyin": "Hǎo a!", "english": "Great!" }
           ]
         },
         {
           "id": 3,
-          "titleChinese": "买椅子",
-          "titleEnglish": "Buying chairs",
+          "titleChinese": "在家里",
+          "titleEnglish": "At home",
           "trackNumber": "01-3",
           "lines": [
-            {
-              "speaker": "A",
-              "chinese": "我们要买几把新椅子。",
-              "pinyin": "Wǒmen yào mǎi jǐ bǎ xīn yǐzi.",
-              "english": "We need to buy a few new chairs."
-            },
-            {
-              "speaker": "B",
-              "chinese": "好，明天下午怎么样？",
-              "pinyin": "Hǎo, míngtiān xiàwǔ zěnmeyàng?",
-              "english": "Okay. How about tomorrow afternoon?"
-            }
+            { "speaker": "A", "chinese": "我们要不要买几个新的椅子？", "pinyin": "Wǒmen yào bu yào mǎi jǐ ge xīn de yǐzi?", "english": "Shall we buy some new chairs?" },
+            { "speaker": "B", "chinese": "好啊.什么时候去买？", "pinyin": "Hǎo a. Shénme shíhou qù mǎi?", "english": "Okay. When shall we go buy them?" },
+            { "speaker": "A", "chinese": "明天下午怎么样？你明天几点能回来？", "pinyin": "Míngtiān xiàwǔ zěnmeyàng? Nǐ míngtiān jǐ diǎn néng huílái?", "english": "How about tomorrow afternoon? What time can you come back tomorrow?" },
+            { "speaker": "B", "chinese": "三点多。", "pinyin": "Sān diǎn duō.", "english": "A bit after three o'clock." }
+          ]
+        },
+        {
+          "id": 4,
+          "titleChinese": "在家里",
+          "titleEnglish": "At home",
+          "trackNumber": "01-4",
+          "lines": [
+            { "speaker": "A", "chinese": "桌子下面有个猫。", "pinyin": "Zhuōzi xiàmiàn yǒu ge māo.", "english": "There is a cat under the table." },
+            { "speaker": "B", "chinese": "那是我的猫，它叫花花。", "pinyin": "Nà shì wǒ de māo, tā jiào Huāhua.", "english": "That is my cat, its name is Huahua." },
+            { "speaker": "A", "chinese": "它很漂亮。", "pinyin": "Tā hěn piàoliang.", "english": "It is very pretty." },
+            { "speaker": "B", "chinese": "是啊，我觉得它的眼睛最漂亮。", "pinyin": "Shì a, wǒ juéde tā de yǎnjīng zuì piàoliang.", "english": "Yes, I think its eyes are the prettiest." },
+            { "speaker": "A", "chinese": "它多大了？", "pinyin": "Tā duō dà le?", "english": "How old is it?" },
+            { "speaker": "B", "chinese": "六个多月。", "pinyin": "Liù ge duō yuè.", "english": "More than six months." }
           ]
         }
       ],
