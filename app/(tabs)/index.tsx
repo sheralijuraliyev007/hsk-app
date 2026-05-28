@@ -34,6 +34,24 @@ const LESSON_ICONS: Record<number, string> = {
   15: 'airplane',
 };
 
+const HSK2_LESSON_ICONS: Record<number, string> = {
+  1:  'airplane',
+  2:  'alarm',
+  3:  'watch',
+  4:  'gift',
+  5:  'cart',
+  6:  'restaurant',
+  7:  'bus',
+  8:  'help-circle',
+  9:  'pencil',
+  10: 'phone-portrait',
+  11: 'people',
+  12: 'snow',
+  13: 'door-open',
+  14: 'videocam',
+  15: 'sparkles',
+};
+
 const NODE_POSITIONS = [
   { left: '50%' }, { left: '70%' }, { left: '50%' }, { left: '30%' }, { left: '50%' },
   { left: '70%' }, { left: '50%' }, { left: '30%' }, { left: '50%' }, { left: '70%' },
@@ -136,7 +154,15 @@ export default function HomeScreen() {
                 {lesson.status === 'completed' ? (
                   <Ionicons name="checkmark" size={32} color="#fff" />
                 ) : (
-                  <Ionicons name={(LESSON_ICONS[lesson.id] ?? 'book') as any} size={28} color="#fff" />
+                  <Ionicons
+                    name={(
+                      (selectedLevel === 1
+                        ? LESSON_ICONS[lesson.id]
+                        : HSK2_LESSON_ICONS[lesson.id]) ?? 'book'
+                    ) as any}
+                    size={28}
+                    color="#fff"
+                  />
                 )}
               </TouchableOpacity>
               <Text style={[styles.nodeLabel, { color: isActive ? '#fff' : '#555' }]} numberOfLines={1}>
