@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, GestureResponderEvent } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getLessonById, SupportedHskLevel } from '@/src/data/lessons';
 import { completeActivity } from '@/src/utils/database';
-import { playAudioFile } from '@/src/utils/audio';
+import { playAudioFile, stopCurrentSound } from '@/src/utils/audio';
 import { getTextbookTrack } from '@/src/utils/lessonAudio';
 import { Audio } from 'expo-av';
 
@@ -20,9 +20,46 @@ export default function LessonDialogueScreen() {
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [done, setDone] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [progressBarWidth, setProgressBarWidth] = useState(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   if (!lesson) return null;
   const handleComplete = async () => { await completeActivity(id, 'dialogue', level); router.back(); };
+  const formatTime = (millis: number) => {
+    const totalSeconds = Math.max(0, Math.floor(millis / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  };
+
+  const onPlaybackStatusUpdate = (status: any) => {
+    if (!status.isLoaded) return;
+    setPosition(status.positionMillis ?? 0);
+    setDuration(status.durationMillis ?? 0);
+    setIsPlaying(Boolean(status.isPlaying));
+    if (status.didJustFinish) {
+      setIsPlaying(false);
+      setPosition(0);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      void stopCurrentSound();
+      soundRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsPlaying(false);
+    setPosition(0);
+    setDuration(0);
+    void stopCurrentSound();
+    soundRef.current = null;
+  }, [dialogueIndex]);
 
   if (done) return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -45,6 +82,7 @@ export default function LessonDialogueScreen() {
 
   const playDialogueTrack = async () => {
     if (!lesson || !dialogue) return;
+    await stopCurrentSound();
     const [lessonNumStr, trackNumStr] = dialogue.trackNumber.split('-');
     const lessonNum = parseInt(lessonNumStr, 10);
     const trackNum = parseInt(trackNumStr, 10);
@@ -58,13 +96,48 @@ export default function LessonDialogueScreen() {
           shouldDuckAndroid: false,
           playThroughEarpieceAndroid: false,
         });
-        await playAudioFile(audioFile);
+        const sound = await playAudioFile(audioFile, onPlaybackStatusUpdate, false);
+        soundRef.current = sound;
+        setIsPlaying(true);
       } catch (e) {
         console.error('Error playing dialogue audio:', e);
       }
     } else {
       console.warn(`Audio file not found for HSK${level}-TB-${dialogue.trackNumber}`);
     }
+  };
+
+  const togglePlayPause = async () => {
+    if (!soundRef.current) {
+      await playDialogueTrack();
+      return;
+    }
+    const status = await soundRef.current.getStatusAsync();
+    if (!status.isLoaded) {
+      soundRef.current = null;
+      await playDialogueTrack();
+      return;
+    }
+    if (status.isPlaying) {
+      await soundRef.current.pauseAsync();
+      setIsPlaying(false);
+    } else {
+      await soundRef.current.playAsync();
+      setIsPlaying(true);
+    }
+  };
+
+  const handleSeek = async (value: number) => {
+    if (!soundRef.current) return;
+    await soundRef.current.setPositionAsync(value);
+    setPosition(value);
+  };
+
+  const handleSeekPress = async (event: GestureResponderEvent) => {
+    if (!duration || !progressBarWidth) return;
+    const ratio = Math.min(1, Math.max(0, event.nativeEvent.locationX / progressBarWidth));
+    const seekTo = Math.floor(duration * ratio);
+    await handleSeek(seekTo);
   };
 
   return (
@@ -74,11 +147,26 @@ export default function LessonDialogueScreen() {
         <Text style={styles.headerTitle}>{dialogue.titleEnglish}</Text>
         <Text style={styles.counter}>{dialogueIndex + 1}/{dialogues.length}</Text>
       </View>
-      <TouchableOpacity style={styles.trackBadge} onPress={playDialogueTrack}>
-        <Ionicons name="musical-note" size={14} color="#16a085" />
-        <Text style={styles.trackText}>Track {dialogue.trackNumber}</Text>
-        <Ionicons name="play-circle-outline" size={18} color="#16a085" />
-      </TouchableOpacity>
+      <View style={styles.controllerContainer}>
+        <TouchableOpacity onPress={togglePlayPause}>
+          <Ionicons name={isPlaying ? 'pause-circle' : 'play-circle'} size={48} color="#16a085" />
+        </TouchableOpacity>
+        <View style={styles.sliderWrapper}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.progressBarBg}
+            onLayout={(event) => setProgressBarWidth(event.nativeEvent.layout.width)}
+            onPress={handleSeekPress}
+          >
+            <View style={[styles.progressBarFill, { width: `${duration > 0 ? (position / duration) * 100 : 0}%` }]} />
+          </TouchableOpacity>
+          <View style={styles.timeRow}>
+            <Text style={styles.timeText}>{formatTime(position)}</Text>
+            <Text style={styles.trackText}>Track {dialogue.trackNumber}</Text>
+            <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          </View>
+        </View>
+      </View>
       <ScrollView contentContainerStyle={styles.content}>
         {dialogue.lines.map((line, i) => (
           <View key={i} style={[styles.lineRow, line.speaker === 'B' && styles.lineRowB]}>
@@ -120,7 +208,20 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1a1a3a' },
   headerTitle: { fontSize: 16, fontWeight: '600', color: '#fff', flex: 1, textAlign: 'center' },
   counter: { fontSize: 14, color: '#888' },
-  trackBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8 },
+  controllerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#16213e',
+    marginHorizontal: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  sliderWrapper: { flex: 1, gap: 8 },
+  progressBarBg: { height: 6, backgroundColor: '#1a1a3a', borderRadius: 3, justifyContent: 'center' },
+  progressBarFill: { height: 6, backgroundColor: '#16a085', borderRadius: 3 },
+  timeRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  timeText: { color: '#888', fontSize: 10 },
   trackText: { fontSize: 13, color: '#16a085' },
   content: { padding: 16, gap: 12 },
   lineRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },

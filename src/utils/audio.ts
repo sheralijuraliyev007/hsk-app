@@ -178,18 +178,54 @@ export function getAudioForWord(text: string) {
   return AUDIO_MAP[text] ?? null;
 }
 
-export async function playAudioFile(audioFile: any) {
+export async function stopCurrentSound() {
+  if (currentSound) {
+    try {
+      await currentSound.stopAsync();
+      await currentSound.unloadAsync();
+    } catch (e) {
+      console.warn('Error stopping sound:', e);
+    } finally {
+      currentSound = null;
+    }
+  }
+}
+
+export async function playAudioFile(
+  audioFile: any,
+  onPlaybackStatusUpdate?: (status: any) => void,
+  waitForCompletion: boolean = true
+): Promise<Audio.Sound> {
+  await stopCurrentSound();
   const { sound } = await Audio.Sound.createAsync(audioFile, { shouldPlay: true });
   currentSound = sound;
+  if (!waitForCompletion) {
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (onPlaybackStatusUpdate) {
+        onPlaybackStatusUpdate(status);
+      }
+      if (status.isLoaded && status.didJustFinish && currentSound === sound) {
+        currentSound = null;
+      }
+    });
+    return sound;
+  }
+
   await new Promise<void>((resolve) => {
     sound.setOnPlaybackStatusUpdate((status) => {
+      if (onPlaybackStatusUpdate) {
+        onPlaybackStatusUpdate(status);
+      }
       if (status.isLoaded && status.didJustFinish) {
         sound.unloadAsync();
-        currentSound = null;
+        if (currentSound === sound) {
+          currentSound = null;
+        }
         resolve();
       }
     });
   });
+  return sound;
 }
 
 async function speakWithTtsFallback(text: string) {
@@ -218,12 +254,7 @@ function getCharacterAudioSequence(text: string) {
 
 export async function speakChinese(text: string) {
   try {
-    // Stop any currently playing audio
-    if (currentSound) {
-      await currentSound.stopAsync();
-      await currentSound.unloadAsync();
-      currentSound = null;
-    }
+    await stopCurrentSound();
 
     const audioFile = AUDIO_MAP[text];
 
