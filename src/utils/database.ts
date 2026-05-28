@@ -102,16 +102,22 @@ export async function seedVocab(words: VocabWord[]) {
   }
 }
 
-export async function getDueCards(): Promise<(VocabWord & CardProgress)[]> {
+export async function getDueCards(hskLevel?: number): Promise<(VocabWord & CardProgress)[]> {
   const today = new Date().toISOString().split('T')[0];
-  return await db.getAllAsync<VocabWord & CardProgress>(`
+  let query = `
     SELECT v.id, v.chinese, v.pinyin, v.english, v.hsk_level as hskLevel,
            cp.repetitions, cp.ease_factor as easeFactor, cp.interval, cp.next_review_date as nextReviewDate
     FROM vocab v
     JOIN card_progress cp ON v.id = cp.word_id
     WHERE cp.next_review_date <= ?
-    LIMIT 20
-  `, [today]);
+  `;
+  const params: (string | number)[] = [today];
+  if (hskLevel) {
+    query += ' AND v.hsk_level = ?';
+    params.push(hskLevel);
+  }
+  query += ' LIMIT 20';
+  return await db.getAllAsync<VocabWord & CardProgress>(query, params);
 }
 
 export async function updateCardProgress(progress: CardProgress) {

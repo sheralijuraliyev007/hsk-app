@@ -1,22 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { HSK1_VOCAB, VocabWord } from '@/src/data/hsk1';
+import { getLessonsByLevel, SupportedHskLevel } from '@/src/data/lessons';
 import { speakChinese } from '@/src/utils/audio';
 
+interface ListeningWord {
+  id: number;
+  chinese: string;
+  pinyin: string;
+  english: string;
+  hskLevel: number;
+}
+
 interface ListeningQuestion {
-  word: VocabWord;
+  word: ListeningWord;
   choices: string[]; // English options
   correctIndex: number;
 }
 
-function buildQuestions(): ListeningQuestion[] {
-  const shuffled = [...HSK1_VOCAB].sort(() => Math.random() - 0.5);
+function buildQuestions(level: SupportedHskLevel): ListeningQuestion[] {
+  const lessons = getLessonsByLevel(level);
+  const allVocab: ListeningWord[] = lessons.flatMap((lesson) =>
+    lesson.vocabulary.map((word) => ({
+      id: word.id,
+      chinese: word.chinese,
+      pinyin: word.pinyin,
+      english: word.english,
+      hskLevel: lesson.hskLevel,
+    }))
+  );
+  const shuffled = [...allVocab].sort(() => Math.random() - 0.5);
   const pool = shuffled.slice(0, 10);
   return pool.map(word => {
-    const others = HSK1_VOCAB.filter(w => w.id !== word.id);
+    const others = allVocab.filter((w) => w.chinese !== word.chinese);
     const distractors = [...others].sort(() => Math.random() - 0.5).slice(0, 3);
     const choices = [word.english, ...distractors.map(d => d.english)].sort(() => Math.random() - 0.5);
     return {
@@ -29,8 +47,10 @@ function buildQuestions(): ListeningQuestion[] {
 
 export default function ListeningScreen() {
   const router = useRouter();
+  const { hskLevel } = useLocalSearchParams<{ hskLevel?: string }>();
+  const level: SupportedHskLevel = hskLevel === '2' ? 2 : 1;
   const insets = useSafeAreaInsets();
-  const [questions] = useState<ListeningQuestion[]>(buildQuestions);
+  const [questions] = useState<ListeningQuestion[]>(() => buildQuestions(level));
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -79,7 +99,10 @@ export default function ListeningScreen() {
         <TouchableOpacity style={styles.primaryBtn} onPress={() => router.back()}>
           <Text style={styles.primaryBtnText}>Back to Practice</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.replace('/study/listening')}>
+        <TouchableOpacity
+          style={styles.secondaryBtn}
+          onPress={() => router.replace({ pathname: '/study/listening', params: { hskLevel: String(level) } })}
+        >
           <Text style={styles.secondaryBtnText}>Try Again</Text>
         </TouchableOpacity>
       </View>
@@ -105,7 +128,7 @@ export default function ListeningScreen() {
       {/* Speaker area */}
       <View style={styles.speakerArea}>
         <Text style={styles.instruction}>What do you hear?</Text>
-        <Text style={{ fontSize: 12, color: '#666' }}>HSK 1 practice mode</Text>
+        <Text style={{ fontSize: 12, color: '#666' }}>HSK {level} listening mode</Text>
         <TouchableOpacity
           style={[styles.speakerBtn, isPlaying && styles.speakerBtnActive]}
           onPress={playAudio}

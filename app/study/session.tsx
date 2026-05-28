@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getDueCards, updateCardProgress, saveSession } from '@/src/utils/database';
 import { calculateNextReview, Rating, CardProgress } from '@/src/utils/sm2';
@@ -12,6 +12,8 @@ type Card = VocabWord & CardProgress;
 
 export default function StudySession() {
   const router = useRouter();
+  const { hskLevel } = useLocalSearchParams<{ hskLevel?: string }>();
+  const level = hskLevel ? Number(hskLevel) : undefined;
   const insets = useSafeAreaInsets();
   const [cards, setCards] = useState<Card[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,11 +23,11 @@ export default function StudySession() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getDueCards().then(due => {
+    getDueCards(level).then(due => {
       setCards(due.length > 0 ? due : []);
       setLoading(false);
     });
-  }, []);
+  }, [level]);
 
   useEffect(() => {
     if (!loading && cards.length > 0) {
@@ -98,7 +100,9 @@ export default function StudySession() {
           <Text style={styles.progress}>{currentIndex + 1} / {cards.length}</Text>
           <Text style={styles.score}>✓ {correct}</Text>
         </View>
-        <Text style={{ color: '#666', textAlign: 'center', marginBottom: 8 }}>Legacy SRS session</Text>
+        <Text style={{ color: '#666', textAlign: 'center', marginBottom: 8 }}>
+          {level ? `HSK ${level} SRS session` : 'SRS session'}
+        </Text>
 
         <View style={styles.progressBarBg}>
           <View style={[styles.progressBarFill, { width: `${(currentIndex / cards.length) * 100}%` }]} />
