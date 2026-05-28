@@ -178,7 +178,7 @@ export function getAudioForWord(text: string) {
   return AUDIO_MAP[text] ?? null;
 }
 
-async function playAudioFile(audioFile: any) {
+export async function playAudioFile(audioFile: any) {
   const { sound } = await Audio.Sound.createAsync(audioFile, { shouldPlay: true });
   currentSound = sound;
   await new Promise<void>((resolve) => {

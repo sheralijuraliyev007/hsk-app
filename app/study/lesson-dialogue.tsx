@@ -5,7 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getLessonById, SupportedHskLevel } from '@/src/data/lessons';
 import { completeActivity } from '@/src/utils/database';
-import { speakChinese } from '@/src/utils/audio';
+import { playAudioFile } from '@/src/utils/audio';
+import { getTextbookTrack } from '@/src/utils/lessonAudio';
+import { Audio } from 'expo-av';
 
 export default function LessonDialogueScreen() {
   const insets = useSafeAreaInsets();
@@ -40,6 +42,31 @@ export default function LessonDialogueScreen() {
   );
 
   const dialogue = dialogues[dialogueIndex];
+
+  const playDialogueTrack = async () => {
+    if (!lesson || !dialogue) return;
+    const [lessonNumStr, trackNumStr] = dialogue.trackNumber.split('-');
+    const lessonNum = parseInt(lessonNumStr, 10);
+    const trackNum = parseInt(trackNumStr, 10);
+
+    const audioFile = getTextbookTrack(level, lessonNum, trackNum);
+    if (audioFile) {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: false,
+          playThroughEarpieceAndroid: false,
+        });
+        await playAudioFile(audioFile);
+      } catch (e) {
+        console.error('Error playing dialogue audio:', e);
+      }
+    } else {
+      console.warn(`Audio file not found for HSK${level}-TB-${dialogue.trackNumber}`);
+    }
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -47,24 +74,22 @@ export default function LessonDialogueScreen() {
         <Text style={styles.headerTitle}>{dialogue.titleEnglish}</Text>
         <Text style={styles.counter}>{dialogueIndex + 1}/{dialogues.length}</Text>
       </View>
-      <View style={styles.trackBadge}>
+      <TouchableOpacity style={styles.trackBadge} onPress={playDialogueTrack}>
         <Ionicons name="musical-note" size={14} color="#16a085" />
         <Text style={styles.trackText}>Track {dialogue.trackNumber}</Text>
-      </View>
+        <Ionicons name="play-circle-outline" size={18} color="#16a085" />
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={styles.content}>
         {dialogue.lines.map((line, i) => (
           <View key={i} style={[styles.lineRow, line.speaker === 'B' && styles.lineRowB]}>
             <View style={[styles.speakerBubble, line.speaker === 'B' && styles.speakerBubbleB]}>
               <Text style={styles.speakerLabel}>{line.speaker}</Text>
             </View>
-            <TouchableOpacity
-              style={[styles.bubble, line.speaker === 'B' && styles.bubbleB]}
-              onPress={() => speakChinese(line.chinese)}
-            >
+            <View style={[styles.bubble, line.speaker === 'B' && styles.bubbleB]}>
               <Text style={styles.bubbleChinese}>{line.chinese}</Text>
               <Text style={styles.bubblePinyin}>{line.pinyin}</Text>
               {showTranslation && <Text style={styles.bubbleEnglish}>{line.english}</Text>}
-            </TouchableOpacity>
+            </View>
           </View>
         ))}
         <View style={{ height: 20 }} />
