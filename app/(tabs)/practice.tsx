@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getAllLessons } from '@/src/data/lessons';
@@ -110,6 +110,8 @@ function getDueCards(cards: SRSCard[], limit = 20): SRSCard[] {
 
 export default function PracticeScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [selectedLevel, setSelectedLevel] = useState<1 | 2>(1);
   const [mode, setMode] = useState<ReviewMode>('menu');
   const [allCards, setAllCards] = useState<SRSCard[]>([]);
   const [dueCards, setDueCards] = useState<SRSCard[]>([]);
@@ -247,6 +249,49 @@ export default function PracticeScreen() {
         {dueCount === 0 && (
           <Text style={styles.caughtUpText}>Come back tomorrow for your next review session.</Text>
         )}
+
+        <View style={styles.focusedSection}>
+          <Text style={styles.focusedSectionTitle}>Focused Practice</Text>
+
+          <View style={styles.levelToggleRow}>
+            <TouchableOpacity
+              style={[styles.levelToggle, selectedLevel === 1 && styles.levelToggleActive]}
+              onPress={() => setSelectedLevel(1)}
+            >
+              <Text style={[styles.levelToggleText, selectedLevel === 1 && styles.levelToggleTextActive]}>HSK 1</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.levelToggle, selectedLevel === 2 && styles.levelToggleActive]}
+              onPress={() => setSelectedLevel(2)}
+            >
+              <Text style={[styles.levelToggleText, selectedLevel === 2 && styles.levelToggleTextActive]}>HSK 2</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.focusedGrid}>
+            <TouchableOpacity
+              style={styles.focusedCard}
+              onPress={() => router.push({ pathname: '/study/listening', params: { hskLevel: String(selectedLevel) } })}
+            >
+              <View style={[styles.iconCircle, { backgroundColor: '#2980b9' }]}>
+                <Ionicons name="headset" size={24} color="#fff" />
+              </View>
+              <Text style={styles.focusedCardTitle}>Listening</Text>
+              <Text style={styles.focusedCardSub}>HSK {selectedLevel} Mode</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.focusedCard}
+              onPress={() => router.push({ pathname: '/study/session', params: { hskLevel: String(selectedLevel) } })}
+            >
+              <View style={[styles.iconCircle, { backgroundColor: '#8e44ad' }]}>
+                <Ionicons name="repeat" size={24} color="#fff" />
+              </View>
+              <Text style={styles.focusedCardTitle}>SRS Session</Text>
+              <Text style={styles.focusedCardSub}>Database Mode</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* How it works */}
         <View style={styles.infoBox}>
@@ -391,6 +436,26 @@ const styles = StyleSheet.create({
   startBtnDisabled: { backgroundColor: '#2a2a4a' },
   startBtnText: { color: '#fff', fontSize: 17, fontWeight: 'bold' },
   caughtUpText: { color: '#888', fontSize: 13, textAlign: 'center' },
+  focusedSection: { marginTop: 24, gap: 12 },
+  focusedSectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
+  levelToggleRow: { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  levelToggle: {
+    flex: 1,
+    backgroundColor: '#16213e',
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  levelToggleActive: { borderColor: '#e94560', backgroundColor: '#1a1a3a' },
+  levelToggleText: { color: '#888', fontWeight: '600', fontSize: 14 },
+  levelToggleTextActive: { color: '#fff' },
+  focusedGrid: { flexDirection: 'row', gap: 12 },
+  focusedCard: { flex: 1, backgroundColor: '#16213e', borderRadius: 16, padding: 16, alignItems: 'center', gap: 8 },
+  iconCircle: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  focusedCardTitle: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  focusedCardSub: { color: '#888', fontSize: 11 },
   infoBox: { backgroundColor: '#16213e', borderRadius: 16, padding: 18, gap: 10 },
   infoTitle: { fontSize: 15, fontWeight: 'bold', color: '#fff' },
   infoText: { fontSize: 13, color: '#aaa', lineHeight: 20 },
