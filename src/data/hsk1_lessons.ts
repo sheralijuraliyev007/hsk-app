@@ -191,18 +191,28 @@ export const HSK1_LESSONS: Lesson[] = [
         titleEnglish: 'Expressing Thanks',
         trackNumber: '02-1',
         lines: [
-          { speaker: 'A', chinese: '谢谢你！', pinyin: 'Xièxie nǐ!', english: 'Thank you!' },
-          { speaker: 'B', chinese: '不客气。', pinyin: 'Bù kèqi.', english: "You're welcome." },
+          { speaker: 'A', chinese: '谢谢！', pinyin: 'Xièxie!', english: 'Thank you!' },
+          { speaker: 'B', chinese: '不谢！', pinyin: 'Bú xiè!', english: "You're welcome!" },
         ],
       },
       {
         id: 2,
-        titleChinese: '道别',
-        titleEnglish: 'Saying Goodbye',
+        titleChinese: '道谢',
+        titleEnglish: 'Expressing Thanks',
         trackNumber: '02-2',
         lines: [
+          { speaker: 'A', chinese: '谢谢你！', pinyin: 'Xièxie nǐ!', english: 'Thank you!' },
+          { speaker: 'B', chinese: '不客气！', pinyin: 'Bú kèqi!', english: "You're welcome!" },
+        ],
+      },
+      {
+        id: 3,
+        titleChinese: '道别',
+        titleEnglish: 'Saying Goodbye',
+        trackNumber: '02-3',
+        lines: [
           { speaker: 'A', chinese: '再见！', pinyin: 'Zàijiàn!', english: 'Goodbye!' },
-          { speaker: 'B', chinese: '再见！明天见！', pinyin: 'Zàijiàn! Míngtiān jiàn!', english: 'Goodbye! See you tomorrow!' },
+          { speaker: 'B', chinese: '再见！', pinyin: 'Zàijiàn!', english: 'Goodbye!' },
         ],
       },
     ],
